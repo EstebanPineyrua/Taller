@@ -20,7 +20,7 @@
     <input type="text" id="buscarCliente" placeholder="Buscar cliente..." oninput="render()">
 </div>
 
-<div class="tabla-container">
+<div class="tabla-container tabla-body-scroll">
     <table>
         <thead>
             <tr>
@@ -28,16 +28,31 @@
                 <th>Cliente</th>
                 <th>Teléfono</th>
                 <th>Equipo</th>
-                <th>Reparación</th>
-                <th>Precio</th>
-                <th>Ingreso</th>
-                <th>Entrega</th>
                 <th>Acciones / Estado</th>
             </tr>
         </thead>
         <tbody id="tabla">
         </tbody>
     </table>
+</div>
+
+<!-- MODAL DETALLES -->
+<div id="modalDetalles" style="
+    display:none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+">
+    <h3>Detalles de la Orden</h3>
+    <div id="contenidoModal"></div>
+    <button style="margin-top:10px; padding:6px 10px; border:none; border-radius:5px; background:#3498db; color:white; cursor:pointer;" onclick="cerrarModal()">Cerrar</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>

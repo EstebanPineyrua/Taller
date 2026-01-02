@@ -1,4 +1,4 @@
-// 🔥 FIREBASE – TU CONFIG
+// 🔥 FIREBASE – CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyCrXnHPcq9J__LWAH7yCd__CtC77MitZ2A",
     authDomain: "dani-peluqueria.firebaseapp.com",
@@ -8,7 +8,6 @@ const firebaseConfig = {
     messagingSenderId: "733641745768",
     appId: "1:733641745768:web:b8f771ddf387ccb037a2dd"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let ordenes = [];
@@ -57,22 +56,6 @@ function render() {
 <td><input type="text" value="${o.equipo}" onchange="ordenes[${i}].equipo=this.value"></td>
 
 <td>
-<select onchange="seleccionFalla(${i}, this.value)">
-<option value="">--Seleccionar--</option>
-<option value="Encerado" ${o.fallaOpcion==="Encerado"?'selected':''}>Encerado</option>
-<option value="Afilado" ${o.fallaOpcion==="Afilado"?'selected':''}>Afilado</option>
-<option value="Montaje" ${o.fallaOpcion==="Montaje"?'selected':''}>Montaje</option>
-<option value="Arreglo de base" ${o.fallaOpcion==="Arreglo de base"?'selected':''}>Arreglo de base</option>
-<option value="Otros" ${o.fallaOpcion==="Otros"?'selected':''}>Otros</option>
-</select>
-<input type="text" style="width:90%; margin-top:4px;" value="${o.falla}" ${o.fallaOpcion==="Montaje"||o.fallaOpcion==="Otros"?'':'disabled'} oninput="ordenes[${i}].falla=this.value">
-</td>
-
-<td><input type="number" value="${o.precio}" onchange="ordenes[${i}].precio=Number(this.value)"></td>
-<td><input type="date" value="${o.fechaIngreso}" onchange="ordenes[${i}].fechaIngreso=this.value"></td>
-<td><input type="date" value="${o.fechaEntrega}" onchange="ordenes[${i}].fechaEntrega=this.value"></td>
-
-<td>
 <div class="acciones">
   <div>
     <button onclick="imprimir(${i})">🖨️</button>
@@ -82,32 +65,21 @@ function render() {
     <button onclick="enviarWhatsapp(${i})">📲</button>
     <input type="checkbox" ${o.estado?'checked':''} onchange="ordenes[${i}].estado=this.checked">
   </div>
+  <div>
+    <button onclick="abrirModal(${i})">📝 Detalles</button>
+  </div>
 </div>
 </td>
-
 </tr>`;
     });
 }
 
-// 📝 FALLA
-function seleccionFalla(index, valor) {
-    ordenes[index].fallaOpcion = valor;
-    const fila = document.getElementById("tabla").rows[index];
-    const inputFalla = fila.cells[4].querySelector("input[type=text]");
-    if(valor==="Montaje" || valor==="Otros"){
-        inputFalla.disabled = false;
-    } else {
-        inputFalla.disabled = true;
-        inputFalla.value = "";
-        ordenes[index].falla = "";
-    }
-}
-
-// 💾 GUARDAR
-function guardar() {
-    db.ref("ordenes_taller").set(ordenes)
-      .then(()=>alert("✅ Guardado"))
-      .catch(()=>alert("❌ Error"));
+// 📲 WHATSAPP
+function enviarWhatsapp(i){
+    const o = ordenes[i];
+    if(!o.telefono) return alert("Falta teléfono");
+    const mensaje = `Hola ${o.cliente}, tu equipo (${o.equipo}) ya está listo.`;
+    window.open(`https://wa.me/${o.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(mensaje)}`,'_blank');
 }
 
 // ✖ BORRAR
@@ -124,16 +96,16 @@ function reordenarNumeros() {
     ordenes.forEach((o,i)=>o.numero=i+1);
 }
 
-// 📲 WHATSAPP
-function enviarWhatsapp(i){
-    const o = ordenes[i];
-    if(!o.telefono) return alert("Falta teléfono");
-    const mensaje = `Hola ${o.cliente}, tu equipo (${o.equipo}) ya está listo.`;
-    window.open(`https://wa.me/${o.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(mensaje)}`,'_blank');
+// 💾 GUARDAR
+function guardar() {
+    db.ref("ordenes_taller").set(ordenes)
+      .then(()=>alert("✅ Guardado"))
+      .catch(()=>alert("❌ Error"));
 }
 
 // 🖨️ IMPRIMIR
 function imprimir(i){
+    guardar(); // Guardamos antes de imprimir
     const o = ordenes[i];
     const line = "================================";
     let fallaTexto = (o.fallaOpcion==="Montaje" || o.fallaOpcion==="Otros") ? `${o.fallaOpcion} – ${o.falla}` : o.fallaOpcion;
@@ -156,16 +128,60 @@ ${line}
 ${line}
 `;
     const ventana = window.open('','_blank','width=400,height=600');
-    ventana.document.write(`
-<html>
-  <head><title>Imprimir</title></head>
-  <body>
-    <pre style="font-family: monospace; font-size: 13px; white-space: pre-wrap;">${texto}</pre>
-  </body>
-</html>
-`);
+    ventana.document.write(`<html><head><title>Imprimir</title></head><body><pre style="font-family: monospace; font-size: 13px; white-space: pre-wrap;">${texto}</pre></body></html>`);
     ventana.document.close();
     ventana.focus();
     ventana.print();
     ventana.close();
+}
+
+// 📝 MODAL DETALLES
+function abrirModal(i){
+    const o = ordenes[i];
+    const modal = document.getElementById("modalDetalles");
+    const contenido = document.getElementById("contenidoModal");
+    contenido.innerHTML = `
+<label>Reparación:</label>
+<select id="modalFalla" onchange="seleccionFallaModal(${i})">
+<option value="">--Seleccionar--</option>
+<option value="Encerado" ${o.fallaOpcion==="Encerado"?'selected':''}>Encerado</option>
+<option value="Afilado" ${o.fallaOpcion==="Afilado"?'selected':''}>Afilado</option>
+<option value="Montaje" ${o.fallaOpcion==="Montaje"?'selected':''}>Montaje</option>
+<option value="Arreglo de base" ${o.fallaOpcion==="Arreglo de base"?'selected':''}>Arreglo de base</option>
+<option value="Otros" ${o.fallaOpcion==="Otros"?'selected':''}>Otros</option>
+</select>
+<input type="text" id="modalFallaInput" style="width:95%; margin-top:4px;" value="${o.falla}" ${o.fallaOpcion?"":"disabled"} oninput="ordenes[${i}].falla=this.value">
+
+<label>Precio:</label>
+<input type="number" value="${o.precio}" onchange="ordenes[${i}].precio=Number(this.value)">
+
+<label>Fecha Ingreso:</label>
+<input type="date" value="${o.fechaIngreso}" onchange="ordenes[${i}].fechaIngreso=this.value">
+
+<label>Fecha Entrega:</label>
+<input type="date" value="${o.fechaEntrega}" onchange="ordenes[${i}].fechaEntrega=this.value">
+
+<label>Estado:</label>
+<input type="checkbox" ${o.estado?'checked':''} onchange="ordenes[${i}].estado=this.checked">
+`;
+    modal.style.display = "block";
+}
+
+function cerrarModal(){
+    document.getElementById("modalDetalles").style.display = "none";
+}
+
+// 📝 FALLA MODAL
+function seleccionFallaModal(index){
+    const select = document.getElementById("modalFalla");
+    const input = document.getElementById("modalFallaInput");
+    const valor = select.value;
+    ordenes[index].fallaOpcion = valor;
+    if(valor==="Montaje" || valor==="Otros" || valor==="Encerado" || valor==="Afilado" || valor==="Arreglo de base" ){
+        input.disabled = false;
+    } else {
+        input.disabled = true;
+        input.value = "";
+        ordenes[index].falla = "";
+    }
 }
