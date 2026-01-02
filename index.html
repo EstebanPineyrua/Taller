@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller</title>
+<link rel="shortcut icon" href="favicon.ico" />
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>⛷️ Taller de Vertical</h1>
+
+<div class="main-card">
+    <button class="btn-add" onclick="nuevaOrden()">➕ Nueva Orden</button>
+    <button class="btn-save" onclick="guardar()">💾 Guardar Todo</button>
+</div>
+
+<div class="buscador">
+    <input type="text" id="buscarCliente" placeholder="Buscar cliente..." oninput="render()">
+</div>
+
+<div class="tabla-container">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Equipo</th>
+                <th>Reparación</th>
+                <th>Precio</th>
+                <th>Ingreso</th>
+                <th>Entrega</th>
+                <th>Acciones / Estado</th>
+            </tr>
+        </thead>
+        <tbody id="tabla">
+        </tbody>
+    </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
