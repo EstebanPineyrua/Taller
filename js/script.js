@@ -78,7 +78,7 @@ function render() {
 function enviarWhatsapp(i){
     const o = ordenes[i];
     if(!o.telefono) return alert("Falta teléfono");
-    const mensaje = `Hola ${o.cliente}, tu equipo (${o.equipo}) ya está listo.`;
+    const mensaje = `Hola ${o.cliente}, tu equipo ${o.equipo} ya está listo.`;
     window.open(`https://wa.me/${o.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(mensaje)}`,'_blank');
 }
 
